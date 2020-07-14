@@ -21,6 +21,8 @@ void pixels();
 void grayPixels();
 void kontrast();
 Mat convertKontrast(Mat,int,float);
+void brightness();
+Mat brightnessManual(Mat, int, float, float);
 	
 
 int main() {
@@ -29,11 +31,12 @@ int main() {
 	img = imread("araba.jpg");
 	imshow("orj", img);
 
-	img3 = convertKontrast(img,1, 0.5);
-
+	img3 = brightnessManual(img, -1, 1, -100);
 	imshow("new", img3);
 
 	waitKey(0);
+
+	//brightness();
 }
 
 void openImage() {
@@ -293,5 +296,56 @@ Mat convertKontrast(Mat input,int depth,float alpha) {
 		}
 	}
 
+	return input;
+}
+
+void brightness() {
+
+	Mat img = imread("araba.jpg");
+	Mat img2, img3;
+
+	img.convertTo(img2, -1,1,100);	// -1 degeri giris resminin ayni kalmasi icin
+	img.convertTo(img3, -1, 1, -100);	// 1 katsayi. 100 de piksellere eklenen deger.
+
+	imshow("1", img2);
+	imshow("2", img3);
+
+	waitKey(0);
+}
+
+Mat brightnessManual(Mat input, int depth, float alpha, float beta) {
+
+	if (depth == -1) {
+
+		for (int i = 0; i < input.rows; i++) {
+			for (int j = 0; j < input.cols; j++) {
+				for (int k = 0; k < 3; k++) {
+					if (input.at<Vec3b>(i, j)[k] * alpha + beta > 255)
+						input.at<Vec3b>(i, j)[k] = 255;
+					else if (input.at<Vec3b>(i, j)[k] * alpha + beta < 0)
+						input.at<Vec3b>(i, j)[k] = 0;
+					else
+						input.at<Vec3b>(i, j)[k] = input.at<Vec3b>(i, j)[k] * alpha + beta;
+
+				}
+			}
+		}
+	}
+
+	if(depth == 1){
+	
+		cvtColor(input, input, CV_BGR2GRAY);
+
+		for (int i = 0; i < input.rows; i++) {
+			for (int j = 0; j < input.cols; j++) {
+				if (input.at<uchar>(i, j) * alpha + beta > 255)
+					input.at<uchar>(i, j) = 255;
+				else if (input.at<uchar>(i, j) * alpha + beta < 0)
+					input.at<uchar>(i, j) = 0;
+				else
+					input.at<uchar>(i, j) = input.at<uchar>(i, j) * alpha + beta;
+			}
+		}
+	}
 	return input;
 }
